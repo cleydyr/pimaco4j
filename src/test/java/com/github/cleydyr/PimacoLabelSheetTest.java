@@ -1,21 +1,23 @@
 package com.github.cleydyr;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import javax.measure.Quantity;
-import javax.measure.quantity.Length;
+import java.util.Optional;
 
 import org.junit.Test;
 
-public class PimacoTagSheetTest {
+public class PimacoLabelSheetTest {
+	private static final double _MAXIMUM_ERROR = 1e-6;
+
 	@Test
 	public void shouldAnswerWithTrue()
 	{
-		PimacoTagSheet s1 = PimacoTagSheet._3080;
+		PimacoLabelSheet s1 = PimacoLabelSheet._3080;
 
 		assertTrue(_compare(s1.getHoriziontalSpacing(), 0.31));
 
-		PimacoTagSheet s2 = PimacoTagSheet._3182;
+		PimacoLabelSheet s2 = PimacoLabelSheet._3182;
 
 		assertTrue(_compare(s2.getHoriziontalSpacing(), 0.52));
 
@@ -28,13 +30,20 @@ public class PimacoTagSheetTest {
 		assertTrue(_compare(SheetSize.LETTER.getSheetHeight(),  27.94));
 
 		assertTrue(_compare(SheetSize.LETTER.getSheetWidth(), 21.59));
+
+		Optional<PimacoLabelSheet> s3 = PimacoLabelSheet.getByCode("A4365");
+
+		assertTrue(s3.isPresent());
+
+		assertTrue(s3.get().getColumns() == 2);
+
+		assertFalse(PimacoLabelSheet.getByCode("B4365").isPresent());
 	}
 
 	private static boolean _compare(
-		Quantity<Length> measure, double otherValue) {
+		double measure, double otherValue) {
 
-		return _compareValuesWithError(
-			measure.getValue().doubleValue(), otherValue, 1e6);
+		return _compareValuesWithError(measure, otherValue, _MAXIMUM_ERROR);
 	}
 
 	private static boolean _compareValuesWithError(

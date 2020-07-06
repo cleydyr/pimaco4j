@@ -1,17 +1,17 @@
 package com.github.cleydyr;
 
-import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import javax.measure.MetricPrefix;
-import javax.measure.Quantity;
-import javax.measure.quantity.Length;
-
-import tech.units.indriya.quantity.Quantities;
-import tech.units.indriya.unit.Units;
-
-public enum PimacoTagSheet {
+/**
+ * <p>Enumeration containing all Pimaco sheet models.</p>
+ * <p>Each model has the measure needed to author documents whose content needs
+ * to fit in a label from the Pimaco manufacturer.</p>
+ */
+public enum PimacoLabelSheet {
 
 	_3080(SheetSize.LETTER, "3080", 1.27, 0.48, 2.54, 6.98, 2.54, 6.67, 3, 10),
 	_3180(SheetSize.LETTER, "3180", 1.27, 0.48, 2.54, 6.98, 2.54, 6.67, 3, 10),
@@ -146,103 +146,182 @@ public enum PimacoTagSheet {
 
 	;
 
-	private PimacoTagSheet(SheetSize sheetSize, String pimacoCode,
-			double verticalMargin, double horizontalMargin,
-			double verticalDensity, double horizontalDensity, double tagHeight,
-			double tagWidth, int columns, int rows) {
-
-		Function<Double, Quantity<Length>> converter =
-			quantity -> Quantities.getQuantity(
-				new BigDecimal(quantity), MetricPrefix.CENTI(Units.METRE));
-
-		this.sheetSize = sheetSize;
-		this.pimacoCode = pimacoCode;
-		this.tagWidth = converter.apply(tagWidth);
-		this.tagHeight = converter.apply(tagHeight);
-		this.horizontalDensity = converter.apply(horizontalDensity);
-		this.verticalDensity = converter.apply(verticalDensity);
-		this.horizontalMargin = converter.apply(horizontalMargin);
-		this.verticalMargin = converter.apply(verticalMargin);
-		this.columns = columns;
-		this.rows = rows;
-	}
-
-	public static Optional<PimacoTagSheet> fromPimacoCode(String pimacoCode) {
-		for (PimacoTagSheet pimacoTagSheet : PimacoTagSheet.values()) {
-			if (pimacoTagSheet.getPimacoCode().equals(pimacoCode)) {
-				return Optional.of(pimacoTagSheet);
-			}
-		}
-
-		return Optional.empty();
-	}
-
-	public SheetSize getSheetSize() {
-		return sheetSize;
-	}
-
-	public String getPimacoCode() {
-		return pimacoCode;
-	}
-
-	public Quantity<Length> getHorizontalDensity() {
-		return horizontalDensity;
-	}
-
-	public Quantity<Length> getVerticalDensity() {
-		return verticalDensity;
-	}
-
-	public Quantity<Length> getTagWidth() {
-		return tagWidth;
-	}
-
-	public Quantity<Length> getTagHeight() {
-		return tagHeight;
-	}
-
-	public Quantity<Length> getHorizontalMargin() {
-		return horizontalMargin;
-	}
-
-	public Quantity<Length> getVerticalMargin() {
-		return verticalMargin;
-	}
-
-	public int getRows() {
-		return rows;
-	}
-
-	public int getColumns() {
-		return columns;
-	}
-
-	public Quantity<Length> getHoriziontalSpacing() {
-		return this.getHorizontalDensity().subtract(this.getTagWidth()); 
-	}
-
-	public Quantity<Length> getVerticalSpacing() {
-		return this.getVerticalDensity().subtract(this.getTagHeight());
-	}
-
 	private final SheetSize sheetSize;
 
-	private final String pimacoCode;
+	private final String code;
 
-	private final Quantity<Length> horizontalDensity;
+	private final double horizontalDensity;
 
-	private final Quantity<Length> verticalDensity;
+	private final double verticalDensity;
 
-	private final Quantity<Length> tagWidth;
+	private final double tagWidth;
 
-	private final Quantity<Length> tagHeight;
+	private final double tagHeight;
 
-	private final Quantity<Length> horizontalMargin;
+	private final double horizontalMargin;
 
-	private final Quantity<Length> verticalMargin;
+	private final double verticalMargin;
 
 	private final int rows;
 
 	private final int columns;
-	
+
+	private static Map<String, PimacoLabelSheet> cache;
+
+	/**
+	 * <p>Looks for a sheet model by code.</p>
+	 * 
+	 * <p>This method differs from valueOf(String) in that valueOf(String) looks
+	 * for the enum by its <em>value</em>, which in some cases is different from
+	 * the model <em>code</em>, as the model code may start with a number.</p>
+	 * 
+	 * @param code the code of the model
+	 * @return an Optional object with a PimacoLabelSheet with data
+	 * corresponding to the model. If there's no such model, then an empty
+	 * Optional is returned.
+	 */
+	public static Optional<PimacoLabelSheet> getByCode(String code) {
+		if (cache == null) {
+			initCache();
+		}
+
+		return Optional.ofNullable(cache.get(code));
+	}
+
+	private PimacoLabelSheet(SheetSize sheetSize, String code,
+			double verticalMargin, double horizontalMargin,
+			double verticalDensity, double horizontalDensity, double tagHeight,
+			double tagWidth, int columns, int rows) {
+
+		this.sheetSize = sheetSize;
+		this.code = code;
+		this.tagWidth = tagWidth;
+		this.tagHeight = tagHeight;
+		this.horizontalDensity = horizontalDensity;
+		this.verticalDensity = verticalDensity;
+		this.horizontalMargin = horizontalMargin;
+		this.verticalMargin = verticalMargin;
+		this.columns = columns;
+		this.rows = rows;
+	}
+
+	/**
+	 * Gets the number of columns in the sheet.
+	 * @return the number of columns
+	 */
+	public int getColumns() {
+		return columns;
+	}
+
+	/**
+	 * Gets the horizontal spacing of the sheet. The horizontal spacing is the
+	 * distance between the right edge of a label and the left edge of a
+	 * neighbor label to the right.
+	 * 
+	 * @return the horizonal spacing (in centimeters)
+	 */
+	public double getHoriziontalSpacing() {
+		return this.getHorizontalDensity() - this.getTagWidth(); 
+	}
+
+	/**
+	 * Gets the horizontal density of the sheet. The horizontal density is the
+	 * distance between the left edge of a label and the left edge of a
+	 * neighbor label to the right.
+	 * between two adjacent labels.
+	 * @return the horizonal density (in centimeters)
+	 */
+	public double getHorizontalDensity() {
+		return horizontalDensity;
+	}
+
+	/**
+	 * Gets the horizional margin of the sheet. The horizional margin is the
+	 * distance between the left edge of the sheet to the left edge of the first
+	 * column of labels of the sheet.
+	 * @return the horizontal margin (in centimeters)
+	 */
+	public double getHorizontalMargin() {
+		return horizontalMargin;
+	}
+
+	/**
+	 * Gets the sheet code.
+	 * @return the sheet code
+	 */
+	public String getCode() {
+		return code;
+	}
+
+	/**
+	 * Gets the number of rows in the sheet.
+	 * @return the number of rows
+	 */
+	public int getRows() {
+		return rows;
+	}
+
+	/**
+	 * Gets the <a href="https://www.iso.org/standard/36631.html">ISO 216</a>
+	 * sheet size as an SheetSize enum. It is either A4 or LETTER.
+	 * @return the sheet size
+	 */
+	public SheetSize getSheetSize() {
+		return sheetSize;
+	}
+
+	/**
+	 * Gets the height of each label in the sheet.
+	 * @return the height of labels (in centimeters)
+	 */
+	public double getTagHeight() {
+		return tagHeight;
+	}
+
+	/**
+	 * Gets the width of each label in the sheet.
+	 * @return the width of labels (in centimeters)
+	 */
+	public double getTagWidth() {
+		return tagWidth;
+	}
+
+	/**
+	 * Gets the vertical density of the sheet. The vertical density is the
+	 * distance between the top edge of a label and top and the top edge of a
+	 * neighbor label below.
+	 * between two adjacent labels.
+	 * @return the vertical density (in centimeters)
+	 */
+	public double getVerticalDensity() {
+		return verticalDensity;
+	}
+
+	/**
+	 * Gets the vertical margin of the sheet. The vertical margin is the
+	 * distance between the top edge of the sheet to the top edge of the first
+	 * row of labels of the sheet.
+	 * @return the vertical margin (in centimeters)
+	 */
+	public double getVerticalMargin() {
+		return verticalMargin;
+	}
+
+	/**
+	 * Gets the vertical spacing of the sheet. The vertical spacing is the
+	 * distance between the bottom edge of a label and the top edge of a
+	 * neighbor label below.
+	 * @return the vertical spacing (in centimeters)
+	 */
+	public double getVerticalSpacing() {
+		return this.getVerticalDensity()  - this.getTagHeight();
+	}
+
+	protected static void initCache() {
+		PimacoLabelSheet[] allLabels = PimacoLabelSheet.values();
+
+		cache = Stream.of(allLabels)
+			.collect(Collectors.toMap(PimacoLabelSheet::getCode,
+				Function.identity()));
+	}
 }

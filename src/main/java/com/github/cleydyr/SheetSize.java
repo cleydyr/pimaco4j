@@ -1,36 +1,35 @@
 package com.github.cleydyr;
 
-import java.math.BigDecimal;
-import java.util.function.Function;
-
-import javax.measure.MetricPrefix;
-import javax.measure.Quantity;
-import javax.measure.quantity.Length;
-
-import tech.units.indriya.quantity.Quantities;
-import tech.units.indriya.unit.Units;
-
+/**
+ * Enumeration of different sheet sizes (as defined by the
+ * <a href="https://www.iso.org/standard/36631.html">ISO 216</a> standard) used
+ * to produce Pimaco tag sheets.
+ */
 public enum SheetSize {
-	A4(21.0, 29.7), LETTER(21.59, 27.94);
+	A4(21, 29.7), LETTER(21.59, 27.94);
+
+	private double sheetWidth;
+
+	private double sheetHeight;
 
 	private SheetSize(double sheetWidth, double sheetHeight) {
-		Function<Double, Quantity<Length>> converter =
-				quantity -> Quantities.getQuantity(
-					new BigDecimal(quantity), MetricPrefix.CENTI(Units.METRE));
-
-		this.sheetWidth = converter.apply(sheetWidth);
-		this.sheetHeight = converter.apply(sheetHeight);
+		this.sheetWidth = sheetWidth;
+		this.sheetHeight = sheetHeight;
 	}
 
-	public Quantity<Length> getSheetWidth() {
+	/**
+	 * Gets the sheet width.
+	 * @return the sheet width (in centimeters)
+	 */
+	public double getSheetWidth() {
 		return sheetWidth;
 	}
 
-	public Quantity<Length> getSheetHeight() {
+	/**
+	 * Gets the sheet height.
+	 * @return the sheet height (in centimeters)
+	 */
+	public double getSheetHeight() {
 		return sheetHeight;
 	}
-
-	private Quantity<Length> sheetWidth;
-
-	private Quantity<Length> sheetHeight;
 }
