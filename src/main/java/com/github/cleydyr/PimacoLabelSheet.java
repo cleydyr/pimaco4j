@@ -154,9 +154,9 @@ public enum PimacoLabelSheet {
 
 	private final double verticalDensity;
 
-	private final double tagWidth;
+	private final double labelWidth;
 
-	private final double tagHeight;
+	private final double labelHeight;
 
 	private final double horizontalMargin;
 
@@ -190,13 +190,13 @@ public enum PimacoLabelSheet {
 
 	private PimacoLabelSheet(SheetSize sheetSize, String code,
 			double verticalMargin, double horizontalMargin,
-			double verticalDensity, double horizontalDensity, double tagHeight,
-			double tagWidth, int columns, int rows) {
+			double verticalDensity, double horizontalDensity, double labelHeight,
+			double labelWidth, int columns, int rows) {
 
 		this.sheetSize = sheetSize;
 		this.code = code;
-		this.tagWidth = tagWidth;
-		this.tagHeight = tagHeight;
+		this.labelWidth = labelWidth;
+		this.labelHeight = labelHeight;
 		this.horizontalDensity = horizontalDensity;
 		this.verticalDensity = verticalDensity;
 		this.horizontalMargin = horizontalMargin;
@@ -221,7 +221,7 @@ public enum PimacoLabelSheet {
 	 * @return the horizonal spacing (in centimeters)
 	 */
 	public double getHoriziontalSpacing() {
-		return this.getHorizontalDensity() - this.getTagWidth(); 
+		return this.getHorizontalDensity() - this.getLabelWidth(); 
 	}
 
 	/**
@@ -274,16 +274,16 @@ public enum PimacoLabelSheet {
 	 * Gets the height of each label in the sheet.
 	 * @return the height of labels (in centimeters)
 	 */
-	public double getTagHeight() {
-		return tagHeight;
+	public double getLabelHeight() {
+		return labelHeight;
 	}
 
 	/**
 	 * Gets the width of each label in the sheet.
 	 * @return the width of labels (in centimeters)
 	 */
-	public double getTagWidth() {
-		return tagWidth;
+	public double getLabelWidth() {
+		return labelWidth;
 	}
 
 	/**
@@ -314,7 +314,7 @@ public enum PimacoLabelSheet {
 	 * @return the vertical spacing (in centimeters)
 	 */
 	public double getVerticalSpacing() {
-		return this.getVerticalDensity()  - this.getTagHeight();
+		return this.getVerticalDensity()  - this.getLabelHeight();
 	}
 
 	protected static void initCache() {
