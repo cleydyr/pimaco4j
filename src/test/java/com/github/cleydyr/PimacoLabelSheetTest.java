@@ -40,6 +40,39 @@ public class PimacoLabelSheetTest {
 		assertFalse(PimacoLabelSheet.getByCode("B4365").isPresent());
 	}
 
+	@Test
+	public void verifyAllSheetDimensions() {
+		for (PimacoLabelSheet sheet : PimacoLabelSheet.values()) {
+			double calculatedWidth = calculateWidth(sheet);
+
+			double sheetWidth = sheet.getSheetSize().getSheetWidth();
+
+			assertTrue(String.format("%f > %f\n", calculatedWidth, sheetWidth), calculatedWidth <= sheetWidth);
+
+			double calculatedHeight = calculateHeight(sheet);
+
+			double sheetHeight = sheet.getSheetSize().getSheetHeight();
+
+			assertTrue(String.format("%f > %f\n", calculatedHeight, sheetHeight), calculatedHeight <= sheetHeight);
+		}
+	}
+
+	private double calculateError(double calculatedWidth, double realWidth) {
+		return Math.abs(calculatedWidth - realWidth)/realWidth;
+	}
+
+	private static double calculateWidth(PimacoLabelSheet sheet) {
+		return sheet.getHorizontalMargin()
+			+ sheet.getColumns()*sheet.getLabelWidth()
+			+ (sheet.getColumns() - 1)*sheet.getHoriziontalSpacing();
+	}
+
+	private static double calculateHeight(PimacoLabelSheet sheet) {
+		return sheet.getVerticalMargin()
+			+ sheet.getRows()*sheet.getLabelHeight()
+			+ (sheet.getRows() - 1)*sheet.getVerticalSpacing();
+	}
+
 	private static boolean _compare(
 		double measure, double otherValue) {
 
