@@ -47,13 +47,21 @@ public class PimacoLabelSheetTest {
 
 			double sheetWidth = sheet.getSheetSize().getSheetWidth();
 
-			assertTrue(String.format("%f > %f\n", calculatedWidth, sheetWidth), calculatedWidth <= sheetWidth);
+			assertTrue(
+				String.format(
+					"for code %s: %f > %f\n", sheet.getCode(), calculatedWidth,
+					sheetWidth),
+				calculatedWidth <= sheetWidth);
 
 			double calculatedHeight = calculateHeight(sheet);
 
 			double sheetHeight = sheet.getSheetSize().getSheetHeight();
 
-			assertTrue(String.format("%f > %f\n", calculatedHeight, sheetHeight), calculatedHeight <= sheetHeight);
+			assertTrue(
+				String.format(
+					"for code %s: %f > %f\n", sheet.getCode(), calculatedHeight,
+					sheetHeight),
+				calculatedHeight <= sheetHeight);
 		}
 	}
 
