@@ -65,10 +65,6 @@ public class PimacoLabelSheetTest {
 		}
 	}
 
-	private double calculateError(double calculatedWidth, double realWidth) {
-		return Math.abs(calculatedWidth - realWidth)/realWidth;
-	}
-
 	private static double calculateWidth(PimacoLabelSheet sheet) {
 		return sheet.getHorizontalMargin()
 			+ sheet.getColumns()*sheet.getLabelWidth()
